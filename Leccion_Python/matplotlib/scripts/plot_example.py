@@ -48,7 +48,7 @@ ax2.set_xlabel("x", fontsize=14, fontname="Times New Roman")
 
 
 ax3.set_title("3D Lorenz attractor", fontsize=20, fontname="Times New Roman")
-pip
+
 # Can we set up predetermined sizes, styles, colors, etc., for all our plots?
 # See plt.rcParams.keys() to check options!
 
