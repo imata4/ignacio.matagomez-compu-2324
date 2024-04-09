@@ -6,11 +6,20 @@
 #define Ms 1.99e30
 #define c 1.496e11
 
-void reescalamiento(double r[][2],double m[],double t, int size);
+void reescalamiento(double r[][2],double m[],double v[][2],double t, int size);
 void leerArchivo(const char *nombre_archivo, double vector[], int *num_elementos);
 void modulo_distancia(double r[][2], double mod_dist[][5], int size);
 void aceleracion(double r[][2],double m[],double a[][2],int size);
-void resultados(const char *nombre_archivo, double r[][2], int num_elementos);
+void escribeMatriz(const char *nombre_archivo, double r[][2], int num_elementos);
+void escribeVector(const char *nombre_archivo, double v[], int num_elementos);
+double calculoT(double v[][2],double m[], double size);
+double calculoV(double r[][2],double m[],double size);
+double calculoE(double V,double T);
+double calculoL(double r[][2],double m[],double v[][2],int size);
+void calculoPeriodo(double r[][2],double aux[],double tiempo,double T[],int size);
+
+
+
 
 //Se trata de una función a la que le pasaremos el nombre del archivo, un vector y el número de elementos de dicho vector. 
 //Su objetivo es leer datos de un archivo y almacenarlos en un vector.
@@ -49,20 +58,23 @@ void leerArchivo(const char *nombre_archivo, double vector[], int *num_elementos
 }
 
 //Hago una función que permita el reescalamiento 
-void reescalamiento(double r[][2],double m[],double t, int size) //Necesito pasarle las posiciones de los planetas y sus masas
+void reescalamiento(double r[][2],double m[],double v[][2],double t, int size) //Necesito pasarle las posiciones de los planetas y sus masas
 {
     int i,j;
+
+       t=t*sqrt((G*Ms)/(pow(c,3)));  //Reescalamiento del tiempo
 
     for(i=0;i<size;i++)
     {
         m[i]=m[i]/Ms;   //Reescalamiento de la masa
         for(j=0;j<2;j++)
         {
-            r[i][j]=r[i][j]/c;  //Reescalamiento de la posición
+            r[i][j]=r[i][j]/c;//Reescalamiento de la posición
+            v[i][j]=v[i][j]*sqrt(c/(G*Ms));
         }
     }
 
-    t=t*sqrt(G*Ms/(pow(c,3)));  //Reescalamiento del tiempo
+    
 
     return;
 }
@@ -120,9 +132,10 @@ void aceleracion(double r[][2],double m[],double a[][2],int size)
 }
 
 
-void resultados(const char *nombre_archivo, double r[][2], int num_elementos)
+void escribeMatriz(const char *nombre_archivo, double r[][2], int num_elementos)
 {
-    FILE *archivo = fopen(nombre_archivo, "w"); // Abre el archivo en modo escritura (sobreescribe si ya existe)
+    FILE *archivo = fopen(nombre_archivo, "a"); // Abre el archivo en modo añadir,de forma que tras cada iteración añada, nuevos datos al archivo
+                                                //Si lo abriese en mode w "write", lo que ocurriría es que los datos se sobreescribirián, y solo quedarían los de la última iteración.
 
     if (archivo == NULL) {
         printf("No se pudo abrir el archivo.\n");
@@ -131,11 +144,20 @@ void resultados(const char *nombre_archivo, double r[][2], int num_elementos)
 
     // Escribe la matriz en el archivo
     for (int i = 0; i < num_elementos; i++) {
-        for (int j = 0; j < 2; j++) {
+        for (int j = 0; j < 2; j++)
+        {
             fprintf(archivo, "%lf ", r[i][j]); // Escribe cada elemento de la matriz
+            if (j==0)
+            {
+                fprintf(archivo,",");
+            }
+            
+            
         }
         fprintf(archivo, "\n"); // Nueva línea al final de cada fila
     }
+
+    fprintf(archivo, "\n"); //Añade nueva línea en blanco para separar datos entre iteraciones
 
     fclose(archivo); // Cierra el archivo
 
@@ -143,10 +165,120 @@ void resultados(const char *nombre_archivo, double r[][2], int num_elementos)
 }
 
 
+void escribeVector(const char *nombre_archivo, double v[], int num_elementos)
+
+{
+     FILE *archivo = fopen(nombre_archivo, "a"); 
+                                              
+    if (archivo == NULL) {
+        printf("No se pudo abrir el archivo.\n");
+        return;
+    }
+
+    // Escribe la matriz en el archivo
+    for (int i = 0; i < num_elementos; i++) 
+    {
+        fprintf(archivo, "%lf ", v[i]); // Escribe cada elemento del vector
+
+        //fprintf(archivo, "\n"); // Nueva línea al final de cada fila
+    }
+
+    fprintf(archivo, "\n"); //Añade nueva línea en blanco para separar datos entre iteraciones
+
+    fclose(archivo); // Cierra el archivo
+
+    return;
+}
+
+double calculoT(double v[][2],double m[],double size)
+{
+    int i,j;
+    double T=0;
+    
+
+    for ( i = 0; i < size; i++)
+    {
+        for ( j = 0; j < 2; j++)
+        {
+            T=0.5*m[i]*sqrt(pow(v[i][j],2)+pow(v[i][j+1],2)); //El módulo lo calculo como la raíz cuadrada de la suma de las componentes al cuadrado
+        }
+        
+    }
+
+    return T;
+}
+
+
+double calculoV(double r[][2],double m[],double size)
+{
+     int i,j;
+    double V=0;
+
+    double mod_dist[5][5];
+     //Calculo los módulos de las distancias que se me guardarán en la matriz mod_dist, que usaré para calcular la aceleración
+    modulo_distancia(r,mod_dist,size);
+
+    for ( i = 0; i < size; i++)
+    {
+        for ( j = 0; j < size; j++)
+        {
+            if (i!=j)
+            {
+                V-=m[i]*m[j]/mod_dist[i][j];
+            }
+            
+        }
+        return V;
+    }
+  
+}
+
+
+
+double calculoE(double V,double T)
+{   
+    double E=V+T;
+
+    return E;
+}
+
+double calculoL(double r[][2],double m[],double v[][2],int size)
+{
+    int i,j;
+
+    double L=0; //Inicializo el momento
+
+    for ( i = 0; i < size; i++)
+    {
+           L+=m[i]*(r[i][0]*v[i][1]-r[i][1]*v[i][0]); //Calculo el momento a partir del producto vectorial, será un vector con dirección +z
+    }
+    
+
+    return L;
+}
+
+
+
+void CalculoPeriodo(double r[][2],double aux[],double tiempo,double T[],int size)
+{
+    int i;
+
+    for ( i = 0; i < size; i++)
+    {
+        if (aux[i]<0 && r[i][1]>0 && T[i]==0)
+        {
+            T[i]=tiempo;
+        }
+        
+    }
+    
+    return;
+
+}
 
 void main(void)
 {
-    double h; 
+    double h=0.1;  //Inicializo h a 0.1 que será el paso temporal cda vez que se ejecute el algoritmo
     int i,j; //Variables auxiliares para bucles
     int size;
     double t; //Tiempo
@@ -166,8 +298,14 @@ void main(void)
     double w[5][2];
 
     int num_elementos=0; //Me sirve para leer los datos de los archivos y obtener cuantos elementos hay
+    double tf;
+    double E,T,V=0; //Variables para energía mecánica, potencial y cinética, respectivamente, e inicializadas a 0.
 
+    double L=0; //Momento inicializado a 0.
 
+    double periodo[5];
+
+    double aux[5];
 
 
 
@@ -217,7 +355,7 @@ printf("Se han leído %d elementos del archivo:\n", num_elementos); //%d hace re
 for(i=0;i<num_elementos;i++)
    {
         r[i][0]=r_x[i];
-        v[i][0]=v_y[i];
+        v[i][1]=v_y[i];
    }
 
 //Compruebo que este bien la matriz de posiciones (Nota: Al no haber asignado valor a la componente y, adquiere el valor 0 por defecto, lo que queríamos)
@@ -244,12 +382,13 @@ for (int i = 0; i < num_elementos; i++) {
 
 printf("Reescalamiento\n");
 t=0;
+tf=1*365*24*3600;
 
-reescalamiento(r,m,t,num_elementos);
+reescalamiento(r,m,v,tf,num_elementos);
 
 for (int i = 0; i < num_elementos; i++) {
         for (int j = 0; j <2; j++) {
-            printf("%e\t", r[i][j]); // Imprimir cada elemento de la matriz
+            printf("%lf\t", r[i][j]); // Imprimir cada elemento de la matriz
         }
         printf("\n"); // Salto de línea al final de cada fila
     }
@@ -259,7 +398,14 @@ for (int i = 0; i < num_elementos; i++) {
         printf("\n"); // Salto de línea al final de cada fila
     }
 
-    printf("%e",t); //Revisar luego el reescalamiento temporal
+    printf("%lf",tf); //Revisar luego el reescalamiento temporal
+
+    for (int i = 0; i < num_elementos; i++) {
+        for (int j = 0; j <2; j++) {
+            printf("%lf\t", v[i][j]); // Imprimir cada elemento de la matriz
+        }
+        printf("\n"); // Salto de línea al final de cada fila
+    }
 
     printf("\n");
 
@@ -273,6 +419,8 @@ for (int i = 0; i < num_elementos; i++) {
  modulo_distancia(r,mod_dist,num_elementos); //La matriz mod dist
 
 //Compruebo que quedan bien almacenados los datos en la matriz mod_dist, la matriz tiene 0 cuando no entra al bucle for, es decir cuando i!=j, pero solo imprimo los valores no nulos
+ printf("\n");
+printf("Módulo de la distancia");
  printf("\n");
 
    for ( i = 0; i < num_elementos; i++ )
@@ -302,11 +450,71 @@ for (int i = 0; i < num_elementos; i++) {
     printf("\n");
    }
     
+for ( t = 0; t < tf; t+=h)
+{
+   //Almaceno las posiciones en la variable auxiliar. Útil para sacar el período.
+   for ( i = 0; i < num_elementos; i++)
+   {
+        aux[i]=r[i][1];     
+   }
+   
+
+
+    //Calculo el momento
+    L=calculoL(r,m,v,num_elementos);
+
+    //Calculo la energía potencial
+    V=calculoV(r,m,num_elementos);
+
+     //Calculo la energía cinética.
+    T=calculoT(r,m,num_elementos);
+
+     //Calculo la energía mecánica.
+    E=calculoE(V,T);
+
+
+
+
+
+
+
+
+
+FILE *archivo = fopen("energia", "a"); 
+
+    
+
+    // Escribe la matriz en el archivo
+    for (int i = 0; i < num_elementos; i++) {
+        for (int j = 0; j < 2; j++)
+        {
+            fprintf(archivo, "%lf ", E,t); // Escribe cada elemento de la matriz
+            /*if (j==0)
+            {
+                fprintf(archivo,",");
+            }
+            */
+            
+        }
+        fprintf(archivo, "\n"); // Nueva línea al final de cada fila
+    }
+
+    fprintf(archivo, "\n"); //Añade nueva línea en blanco para separar datos entre iteraciones
+
+    fclose(archivo); // Cierra el archivo
+
+
+
+
+
+
+    
+
 
       /*##############################
     ########### PASO 2 #############
     ##############################*/
-
+   
 
      //Evalúo las posiciones a tiempo t y también w
     
@@ -320,7 +528,19 @@ for (int i = 0; i < num_elementos; i++) {
     
    }
 
+    for ( i = 0; i < num_elementos; i++)   //Inicializo a las aceleraciones a cero para que no se guarden las del paso anterior 
+    {
+        for ( j = 0; j < 2; j++)
+        {
+            a[i][j]=0;
+        }
+        
+    }
 
+    
+    
+   
+    
    /*##############################
     ########### PASO 3 #############
     ##############################*/
@@ -343,63 +563,19 @@ for (int i = 0; i < num_elementos; i++) {
             }
     
    }
-t=t+h;
+
+   calculoPeriodo(r,aux,t,periodo,num_elementos); //Calculo los períodos si es que ya han recorrido un periodo
+
+   
+
    //METO LOS RESULTADOS EN UN ARCHIVO
+ 
+   escribeMatriz("resultados.txt",r, num_elementos);
+   
+}
 
-   resultados("resultados.txt",r, num_elementos);
-
-
-
-
-//PROGRAMA ORIGINAL
-
-
-
-/*
-    //Evalúo las posiciones a tiempo t y también w
-    
-    for ( i = 0; i < num_elementos; i++)
-   {
-        for ( j = 0; j < 2; j++)
-            {
-               r[i][j]=r[i][j]+h*v[i][j]+0.5*h*h*a[i][j]; //Actualizo la posición del vector de posiciones
-               w[i][j]=v[i][j]+0.5*h*a[i][j];
-            }
-    
-   }
-*/
-
-   /*##############################
-    ########### PASO 3 #############
-    ##############################*/
-
-    //Evalúo las aceleraciones con mis nuevas posiciones 
-
-   // aceleracion(r,m,a,num_elementos); //La única diferencia es que ahora mi r está modificado, así que obtendré otra aceleración
-
-    /*##############################
-    ########### PASO 4 #############
-    ##############################*/
-
-    //Evalúo las velocidades con mis nuevas aceleraciones
-/*
-      for ( i = 0; i < num_elementos; i++)
-   {
-        for ( j = 0; j < 2; j++)
-            {
-               
-               v[i][j]=v[i][j]+w[i][j]+0.5*h*a[i][j];
-            }
-    
-   }
-*/
-     /*##############################
-    ########### PASO 5 #############
-    ##############################*/
-
-    //Elevo un paso en el tiempo
-   // t=t+h;
-
+//Imprimo en un archivo los periodos
+//escribeVector("periodos.txt",periodo,num_elementos);
 
 
 
