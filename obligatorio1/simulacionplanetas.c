@@ -8,15 +8,16 @@
 
 void reescalamiento(double r[][2],double m[],double v[][2],double t, int size);
 void leerArchivo(const char *nombre_archivo, double vector[], int *num_elementos);
-void modulo_distancia(double r[][2], double mod_dist[][5], int size);
+void modulo_distancia(double r[][2], double mod_dist[][6], int size);
 void aceleracion(double r[][2],double m[],double a[][2],int size);
 void escribeMatriz(const char *nombre_archivo, double r[][2], int num_elementos);
 void escribeVector(const char *nombre_archivo, double v[], int num_elementos);
-double calculoT(double v[][2],double m[], double size);
-double calculoV(double r[][2],double m[],double size);
+double calculoT(double v[][2],double m[], int size);
+double calculoV(double r[][2],double m[],int size);
 double calculoE(double V,double T);
 double calculoL(double r[][2],double m[],double v[][2],int size);
 void calculoPeriodo(double r[][2],double aux[],double tiempo,double T[],int size);
+void geocentrico(double r[][2],double rgeo[][2],int size);
 
 
 
@@ -41,8 +42,8 @@ void leerArchivo(const char *nombre_archivo, double vector[], int *num_elementos
     while (fscanf(archivo,"%lf",&valor)!=EOF) 
     {
         vector[num_leidos]=valor; //Asingamos el valor de cada dato que va leyendo, al vector en la posición equivalente al número de datos leídos del vector
-        printf("%lf",valor); //Vemos en pantalla que se ha leído bien el archivo y guardado en el vector.
-        printf("\n");
+        //printf("%lf",valor); //Vemos en pantalla que se ha leído bien el archivo y guardado en el vector.
+       // printf("\n");
         num_leidos=num_leidos+1; //Incrementamos el número de datos leídos en uno para actualizar el siguiente dato que ha de leerse.
     } 
 
@@ -62,7 +63,7 @@ void reescalamiento(double r[][2],double m[],double v[][2],double t, int size) /
 {
     int i,j;
 
-       t=t*sqrt((G*Ms)/(pow(c,3)));  //Reescalamiento del tiempo
+      // t=t*sqrt((G*Ms)/(pow(c,3)));  //Reescalamiento del tiempo
 
     for(i=0;i<size;i++)
     {
@@ -79,7 +80,7 @@ void reescalamiento(double r[][2],double m[],double v[][2],double t, int size) /
     return;
 }
 
-void modulo_distancia(double r[][2], double mod_dist[][5], int size)
+void modulo_distancia(double r[][2], double mod_dist[][6], int size)
 {
     int i,j;
 
@@ -92,8 +93,8 @@ void modulo_distancia(double r[][2], double mod_dist[][5], int size)
         {
             if (i!=j)
             {
-                mod_dist[i][j]=sqrt(pow(r[i][0]-r[j][0],2)+pow(r[i][1]-r[j][1],2));
-                  printf("%lf",mod_dist[i][j]);
+                mod_dist[i][j]=sqrt(pow((r[i][0]-r[j][0]),2)+pow((r[i][1]-r[j][1]),2));
+                 
             }
             
          }
@@ -110,19 +111,37 @@ void modulo_distancia(double r[][2], double mod_dist[][5], int size)
 void aceleracion(double r[][2],double m[],double a[][2],int size)
 {
     int i,j;
-    double mod_dist[5][5];
+    double mod_dist[size][size];
+
 
     //Calculo los módulos de las distancias que se me guardarán en la matriz mod_dist, que usaré para calcular la aceleración
     modulo_distancia(r,mod_dist,size);
 
+for ( i = 0; i < size; i++)
+{
+    a[i][0]=0;
+    a[i][1]=0;
+}
+
+
     for ( i = 0; i < size; i++)
     {
+       
         for ( j = 0; j < size; j++)
         {
             if (i!=j)
             {
-                a[i][0]-=(m[j]*(r[i][0]-r[j][0]))/pow(mod_dist[i][j],3);
-                a[i][1]-=(m[j]*(r[i][1]-r[j][1]))/pow(mod_dist[i][j],3);
+                for (int k = 0; k < 2; k++)
+                {
+                    a[i][k]=a[i][k]-(m[j]*(r[i][k]-r[j][k]))/(pow(mod_dist[i][j],3));
+                }
+                
+                
+                
+               //mod=sqrt(pow(r[i][0]-r[j][0],2)+pow(r[i][1]-r[j][1],2));
+
+              // a[i][0]-=(m[j]*(r[i][0]-r[j][0]))/(pow(mod,3));
+               //a[i][1]-=(m[j]*(r[i][1]-r[j][1]))/(pow(mod,3));
             }
             
         }
@@ -190,7 +209,7 @@ void escribeVector(const char *nombre_archivo, double v[], int num_elementos)
     return;
 }
 
-double calculoT(double v[][2],double m[],double size)
+double calculoT(double v[][2],double m[],int size)
 {
     int i,j;
     double T=0;
@@ -198,10 +217,7 @@ double calculoT(double v[][2],double m[],double size)
 
     for ( i = 0; i < size; i++)
     {
-        for ( j = 0; j < 2; j++)
-        {
-            T=0.5*m[i]*sqrt(pow(v[i][j],2)+pow(v[i][j+1],2)); //El módulo lo calculo como la raíz cuadrada de la suma de las componentes al cuadrado
-        }
+            T=0.5*m[i]*sqrt(pow(v[i][0],2)+pow(v[i][1],2)); //El módulo lo calculo como la raíz cuadrada de la suma de las componentes al cuadrado
         
     }
 
@@ -209,12 +225,12 @@ double calculoT(double v[][2],double m[],double size)
 }
 
 
-double calculoV(double r[][2],double m[],double size)
+double calculoV(double r[][2],double m[],int size)
 {
      int i,j;
     double V=0;
 
-    double mod_dist[5][5];
+    double mod_dist[size][size];
      //Calculo los módulos de las distancias que se me guardarán en la matriz mod_dist, que usaré para calcular la aceleración
     modulo_distancia(r,mod_dist,size);
 
@@ -259,7 +275,7 @@ double calculoL(double r[][2],double m[],double v[][2],int size)
 
 
 
-void CalculoPeriodo(double r[][2],double aux[],double tiempo,double T[],int size)
+void calculoPeriodo(double r[][2],double aux[],double tiempo,double T[],int size)
 {
     int i;
 
@@ -276,26 +292,43 @@ void CalculoPeriodo(double r[][2],double aux[],double tiempo,double T[],int size
 
 }
 
+void geocentrico(double r[][2],double rgeo[][2],int size)
+{
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            rgeo[i][j]=r[i][j]-r[3][j];
+        }
+        
+    }
+    return;
+    
+}
+
+
 void main(void)
 {
-    double h=0.1;  //Inicializo h a 0.1 que será el paso temporal cda vez que se ejecute el algoritmo
+    double h=0.01;  //Inicializo h a 0.1 que será el paso temporal cada vez que se ejecute el algoritmo
     int i,j; //Variables auxiliares para bucles
     int size;
     double t; //Tiempo
 
-    double m[5]; //masa
+    int n=6;    //Número de planetas
 
-    double r_x[5]; //Vector para obtener la componente x del vector de posición en las condiciones iniciales
-    double r[5][2]; //Matriz de posiciones, primera columna tiene componente x, y la segunda la componente y
+    double m[n]; //masa
 
-    double v[5][2]; //Matriz de velocidades, primera columna tiene componente x, y la segunda la componente y
-    double v_y[5]; // Vector para obtener la componente y del vector velocidad en las condiciones iniciales
+    double r_x[n]; //Vector para obtener la componente x del vector de posición en las condiciones iniciales
+    double r[n][2]; //Matriz de posiciones, primera columna tiene componente x, y la segunda la componente y
 
-    double mod_dist[5][5]; //Matriz que almacena el modulo de la distancia
+    double v[n][2]; //Matriz de velocidades, primera columna tiene componente x, y la segunda la componente y
+    double v_y[n]; // Vector para obtener la componente y del vector velocidad en las condiciones iniciales
 
-    double a[5][2]; //Matriz que guarda las aceleraciones de los 5 planetas, componente x en columna 1 y a_y en columna 2
+    double mod_dist[n][n]; //Matriz que almacena el modulo de la distancia
 
-    double w[5][2];
+    double a[n][2]; //Matriz que guarda las aceleraciones de los 5 planetas, componente x en columna 1 y a_y en columna 2
+
+    double w[n][2];
 
     int num_elementos=0; //Me sirve para leer los datos de los archivos y obtener cuantos elementos hay
     double tf;
@@ -303,9 +336,17 @@ void main(void)
 
     double L=0; //Momento inicializado a 0.
 
-    double periodo[5];
+    double periodo[n];
 
-    double aux[5];
+    double aux[n];
+
+    double rgeo[n][2];
+
+    FILE *f1,*f2;
+    f1= fopen("energia.txt", "a"); 
+
+    f2= fopen("momento.txt", "a"); 
+   
 
 
 
@@ -315,37 +356,18 @@ void main(void)
 
     leerArchivo("masas.txt",m,&num_elementos);
 
-    printf("Se han leído %d elementos del archivo:\n", num_elementos); //%d hace referencia a num_elementos
-  
-        for (i = 0; i <num_elementos; i++) 
-        {
-            printf("%lf ", m[i]);
-        }
-        printf("\n");
 
 //En este fichero se encuentran en la primera fila todos los valores del radio orbital en m
 //Leo y actualizo el vector de posiciones con los datos iniciales, en este caso solo tendrán componente x, así que trabajo con el vector x
 leerArchivo("posiciones_iniciales.txt",r_x,&num_elementos);
 
-printf("Se han leído %d elementos del archivo:\n", num_elementos); //%d hace referencia a num_elementos
+
   
-        for (i = 0; i < num_elementos; i++) 
-        {
-            printf("%lf ", r_x[i]);
-        }
-        printf("\n");
-   
+
    
 //En este fichero se encuentran en la primera fila todos los valores de la velocidad en m/s
 leerArchivo("velocidades_iniciales.txt",v_y,&num_elementos);
 
-printf("Se han leído %d elementos del archivo:\n", num_elementos); //%d hace referencia a num_elementos
-  
-        for (i = 0; i < num_elementos; i++) 
-        {
-            printf("%lf ", v_y[i]);
-        }
-        printf("\n");
 
 //Voy a trabajar con una matriz de posiciones y otra de velocidades, no obstante me he valido de vectores para obtener los datos iniciales.
 //Tanto en posición como en velocidad, he supuesto una componente nula, ahora reescribo mi matriz a partir de los vectores obtenidos.
@@ -358,56 +380,20 @@ for(i=0;i<num_elementos;i++)
         v[i][1]=v_y[i];
    }
 
-//Compruebo que este bien la matriz de posiciones (Nota: Al no haber asignado valor a la componente y, adquiere el valor 0 por defecto, lo que queríamos)
-
- for (int i = 0; i < num_elementos; i++) {
-        for (int j = 0; j <2; j++) {
-            printf("%lf\t", r[i][j]); // Imprimir cada elemento de la matriz
-        }
-        printf("\n"); // Salto de línea al final de cada fila
-    }
-
-//Compruebo que también haya quedado bien la matriz de velocidades
-
-for (int i = 0; i < num_elementos; i++) {
-        for (int j = 0; j <2; j++) {
-            printf("%lf\t", v[i][j]); // Imprimir cada elemento de la matriz
-        }
-        printf("\n"); // Salto de línea al final de cada fila
-    }
-    
+for ( i = 0; i < num_elementos; i++)
+{
+    r[i][1]=0;
+    v[i][0]=0;
+}
 
 //Hago el reescalamiento
-//Tengo que meter un tiempo distinto de 0 porque sino, el reescalamiento no va a funcionar
 
-printf("Reescalamiento\n");
 t=0;
 tf=1*365*24*3600;
+//tf=100;
 
 reescalamiento(r,m,v,tf,num_elementos);
-
-for (int i = 0; i < num_elementos; i++) {
-        for (int j = 0; j <2; j++) {
-            printf("%lf\t", r[i][j]); // Imprimir cada elemento de la matriz
-        }
-        printf("\n"); // Salto de línea al final de cada fila
-    }
-
-    for (int i = 0; i < num_elementos; i++) {
-            printf("%e\t", m[i]); // Imprimir cada elemento de la matriz
-        printf("\n"); // Salto de línea al final de cada fila
-    }
-
-    printf("%lf",tf); //Revisar luego el reescalamiento temporal
-
-    for (int i = 0; i < num_elementos; i++) {
-        for (int j = 0; j <2; j++) {
-            printf("%lf\t", v[i][j]); // Imprimir cada elemento de la matriz
-        }
-        printf("\n"); // Salto de línea al final de cada fila
-    }
-
-    printf("\n");
+ tf=tf*sqrt((G*Ms)/(pow(c,3)));
 
     /*##############################
     ########### PASO 1 #############
@@ -416,39 +402,13 @@ for (int i = 0; i < num_elementos; i++) {
     //Calculamos el módulo de la distancia entre dos cuerpos y lo guardo en una matriz
     //Para ello utilizo una función que me calcula el modulo de la distancia entre los 2 cuerpos.
 
- modulo_distancia(r,mod_dist,num_elementos); //La matriz mod dist
+ //modulo_distancia(r,mod_dist,num_elementos); //La matriz mod dist
 
-//Compruebo que quedan bien almacenados los datos en la matriz mod_dist, la matriz tiene 0 cuando no entra al bucle for, es decir cuando i!=j, pero solo imprimo los valores no nulos
- printf("\n");
-printf("Módulo de la distancia");
- printf("\n");
-
-   for ( i = 0; i < num_elementos; i++ )
-    {
-       
-            for ( j = 0; j < num_elementos; j++)
-            {   if (i!=j)
-                printf("%lf",mod_dist[i][j]);
-            }
-            printf("\n");
-       
-            
-    }
-    
-    printf("\n");
     //Ya puedo calcular la aceleración
-    aceleracion(r,m,a,num_elementos);
+    aceleracion(r,m,a,num_elementos); 
 
     //Veo como queda la matriz de aceleraciones
 
-   for ( i = 0; i < num_elementos; i++)
-   {
-        for ( j = 0; j < 2; j++)
-            {
-                printf("%lf",a[i][j]);
-            }
-    printf("\n");
-   }
     
 for ( t = 0; t < tf; t+=h)
 {
@@ -467,48 +427,10 @@ for ( t = 0; t < tf; t+=h)
     V=calculoV(r,m,num_elementos);
 
      //Calculo la energía cinética.
-    T=calculoT(r,m,num_elementos);
+    T=calculoT(v,m,num_elementos);
 
      //Calculo la energía mecánica.
     E=calculoE(V,T);
-
-
-
-
-
-
-
-
-
-FILE *archivo = fopen("energia", "a"); 
-
-    
-
-    // Escribe la matriz en el archivo
-    for (int i = 0; i < num_elementos; i++) {
-        for (int j = 0; j < 2; j++)
-        {
-            fprintf(archivo, "%lf ", E,t); // Escribe cada elemento de la matriz
-            /*if (j==0)
-            {
-                fprintf(archivo,",");
-            }
-            */
-            
-        }
-        fprintf(archivo, "\n"); // Nueva línea al final de cada fila
-    }
-
-    fprintf(archivo, "\n"); //Añade nueva línea en blanco para separar datos entre iteraciones
-
-    fclose(archivo); // Cierra el archivo
-
-
-
-
-
-
-    
 
 
       /*##############################
@@ -522,24 +444,12 @@ FILE *archivo = fopen("energia", "a");
    {
         for ( j = 0; j < 2; j++)
             {
-               r[i][j]=r[i][j]+h*v[i][j]+0.5*h*h*a[i][j]; //Actualizo la posición del vector de posiciones
-               w[i][j]=v[i][j]+0.5*h*a[i][j];
+               r[i][j]=r[i][j]+h*v[i][j]+(h*h*a[i][j])/2.0; //Actualizo la posición del vector de posiciones
+               w[i][j]=v[i][j]+(h*a[i][j])/2.0;
             }
     
    }
 
-    for ( i = 0; i < num_elementos; i++)   //Inicializo a las aceleraciones a cero para que no se guarden las del paso anterior 
-    {
-        for ( j = 0; j < 2; j++)
-        {
-            a[i][j]=0;
-        }
-        
-    }
-
-    
-    
-   
     
    /*##############################
     ########### PASO 3 #############
@@ -559,7 +469,7 @@ FILE *archivo = fopen("energia", "a");
    {
         for ( j = 0; j < 2; j++)
             {
-               v[i][j]=v[i][j]+w[i][j]+0.5*h*a[i][j];
+               v[i][j]=v[i][j]+w[i][j]+(h*a[i][j])/2.0;
             }
     
    }
@@ -571,12 +481,38 @@ FILE *archivo = fopen("energia", "a");
    //METO LOS RESULTADOS EN UN ARCHIVO
  
    escribeMatriz("resultados.txt",r, num_elementos);
+
+   
+
+   geocentrico(r,rgeo,num_elementos); //Calculo las posiciones geocéntricas
+
+   //METO LOS RESULTADOS GEOCÉNTRICOS EN UN ARCHIVO
+ 
+   escribeMatriz("geocentrico.txt",rgeo, num_elementos);
+
+
+
+   // Escribo la energía mecánica en energia.txt
+    
+            fprintf(f1, "%lf, %lf ", t, E); 
+   
+        fprintf(f1, "\n"); // Nueva línea al final de cada fila
+ 
+// Escribo el momento angular en momento.txt
+    fprintf(f2, "%lf, %lf ", t, L); 
+   
+        fprintf(f2, "\n"); // Nueva línea al final de cada fila
+
    
 }
 
-//Imprimo en un archivo los periodos
-//escribeVector("periodos.txt",periodo,num_elementos);
+aceleracion(r,m,a,num_elementos);
+escribeMatriz("aceleraciones.txt",a,num_elementos);
 
+fclose(f1);//Cierro el archivo donde guardo las energias
+fclose(f2);//Cierro el archivo donde guardo los momentos
+//Imprimo en un archivo los periodos
+escribeVector("periodos.txt",periodo,num_elementos);
 
 
 }
