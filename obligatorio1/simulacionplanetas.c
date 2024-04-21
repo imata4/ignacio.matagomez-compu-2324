@@ -235,7 +235,6 @@ double calculoV(double r[][2],double m[],int size)
     modulo_distancia(r,mod_dist,size);
 
     for ( i = 0; i < size; i++)
-    {
         for ( j = 0; j < size; j++)
         {
             if (i!=j)
@@ -244,8 +243,9 @@ double calculoV(double r[][2],double m[],int size)
             }
             
         }
-        return V;
-    }
+        
+    
+    return V;
   
 }
 
