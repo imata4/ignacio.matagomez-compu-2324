@@ -16,8 +16,11 @@ N=10
 s=np.random.choice([1,-1],(N,N))
 
 #Pongo un rango de tiempo máximo para mi bucle e inicializo el contador de tiempo a 0
-tf=1000000
+tf=10000
 t=0
+
+#Defino una variable de fichero donde guardar los datos
+archivo=open("C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/obligatorio2/isingresultados.txt","w")
 
 while t<tf:
 
@@ -57,9 +60,13 @@ while t<tf:
 
         if (p>np.random.randint(0,1)):
             s[n][m]=-s[n][m]
-
-    #En cada iteración de un paso temporal escribo en un archivo los datos
-    np.savetxt('matriz.txt', s, fmt='%d')
+    
+    for i in range(N): #Columnas
+        for j in range(N-1): #Filas
+            archivo.write(f'{s[i][j]},')  
+        archivo.write(f'{s[i][j]}')
+        archivo.write('\n')  #Salto de línea
+    archivo.write('\n')
 
 
     t=t+1

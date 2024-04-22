@@ -47,7 +47,7 @@ import io
 
 # Parámetros
 # ========================================
-file_in = "ising_data.dat" # Nombre del fichero de datos
+file_in = "C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/obligatorio2/isingresultados.txt" # Nombre del fichero de datos
 file_out = "ising" # Nombre del fichero de salida (sin extensión)
 interval = 100 # Tiempo entre fotogramas en milisegundos
 save_to_file = False # False: muestra la animación por pantalla,
