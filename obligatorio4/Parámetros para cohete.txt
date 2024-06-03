@@ -1,0 +1,15 @@
+Parámetros para cohete
+
+h = 30
+r = 0.0166; //posición inicial del cohete rescalada. Lo situamos a una distancia de 1R_T
+phi =PI/2.0; //lanzamos el cohete desde el polo norte
+
+v0= 0.000029; //velocidad de escape del cohete (11.2km/s) reescalada 
+theta = 56.3*PI/180.0; // Lo lanzo desde granada
+	
+//Coloco inicialmente a la Luna y el cohete en el eje y
+//La luna se encuentra a una distancia tierra luna y el cohete sale desde la superficie de la Tierra
+xLuna = 1;
+yLuna = 0;
+xcohete = r;
+ycohete = 0;

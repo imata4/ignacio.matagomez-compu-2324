@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 
 //Declaración de constantes a utilizar
 #define G 6.67e-11
@@ -17,13 +18,16 @@ double calculoL(double r[][2],double m[],double v[][2],int size);
 void calculoPeriodo(double r[][2],double aux[],double tiempo,double T[],int size);
 
 void main(void)
-{   
+{ 
+     //Pongo esto para ver el tiempo de compilación
+    clock_t begin= clock();
+
     int i,j; //Variables auxiliares para bucles
     double h; //Paso temporal
     h=0.01;
 
     int n; //Número de planetas
-    n=10; 
+    n=7; 
 
     double m[n];    //Vector de masas
 
@@ -56,6 +60,7 @@ void main(void)
     f4= fopen("momento.txt", "w");
     f5= fopen("periodos.txt", "w");  
     
+
      //Inicializo el vector de periodos
     for ( i = 0; i < n; i++)
         periodo[i]=0;
@@ -201,6 +206,11 @@ void main(void)
     fclose(f3);
     fclose(f4);
     fclose(f5);
+
+    //Calculo el tiempo de ejecución
+    clock_t end=clock();
+    double tiempo= (double) (end-begin)/ CLOCKS_PER_SEC;
+    printf("Tiempo de compilacion=%lf \n", tiempo);
 
     return;
 }

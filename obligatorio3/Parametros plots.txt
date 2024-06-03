@@ -1,0 +1,9 @@
+Parámetros de los plots
+
+     h=0.1; //Espaciado en la discretización espacial
+     N=1000; //Números de puntos del retículo
+     tmax=10000;
+
+     nciclos=250;//Toma valores de 0 a N/4
+  
+     lambda=0.2;    lambda=0.5; lambda=0.9; 

@@ -4,19 +4,20 @@ from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 
+
 #Asigno una T entre 0 y 5
-T=3.0
+T=1
 
 #Establezco N como el tamaño de la matriz
 
-N=10
+N=120
 
 #Creo una matriz NxN y la relleno de 1 y -1
 
 s=np.random.choice([1,-1],(N,N))
 
 #Pongo un rango de tiempo máximo para mi bucle e inicializo el contador de tiempo a 0
-tf=10000
+tf=100
 t=0
 
 #Defino una variable de fichero donde guardar los datos
@@ -56,10 +57,12 @@ while t<tf:
 
         E=2.0*s[n][m]*(s[aux1][m]+s[aux2][m]+s[n][aux3]+s[n][aux4])
 
+    
         p=min(1.0,np.exp(-E/T))
 
-        if (p>np.random.randint(0,1)):
-            s[n][m]=-s[n][m]
+        if (p>np.random.rand()):
+           s[n][m]=-s[n][m]
+            
     
     for i in range(N): #Columnas
         for j in range(N-1): #Filas
@@ -70,3 +73,4 @@ while t<tf:
 
 
     t=t+1
+archivo.close()
