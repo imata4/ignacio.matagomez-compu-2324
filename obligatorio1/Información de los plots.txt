@@ -1,0 +1,6 @@
+Información de los plots
+
+Heliocéntrico y geocéntrico
+Tiempo de la simulación: tf=20años
+Paso temporal: h=0.1
+Número de planetas: n=10

@@ -27,7 +27,7 @@ void main(void)
     h=0.01;
 
     int n; //Número de planetas
-    n=7; 
+    n=10; 
 
     double m[n];    //Vector de masas
 
