@@ -3,7 +3,8 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "C:/tools/miniconda3/Library/include"
             ],
             "defines": [
                 "_DEBUG",

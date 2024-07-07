@@ -1,0 +1,22 @@
+Parámetros de los gifs con phi=0.1 y psi=0.3
+E=1, phi=0.1, psi=0.3 Hay que poner h=0.01 tf=10000
+E=3, phi=0.1, psi=0.3 Hay que poner h=0.01 tf=10000
+E=5, phi=0.1, psi=0.3 Hay que poner h=0.01 tf=10000
+E=10, phi=0.1, psi=0.3 Hay que poner h=0.001 tf=10000
+E=15, phi=0.1, psi=0.3 Hay que poner h=0.001 tf=10000
+
+Parámetros de los plots de los mapas de Poincaré
+E=1, phi=0.1, psi=0.3 Hay que poner h=0.001 tf=1000
+E=3, phi=0.1, psi=0.3 Hay que poner h=0.001 tf=1000
+E=5, phi=0.1, psi=0.3 Hay que poner h=0.001 tf=1000
+E=10, phi=0.1, psi=0.3 Hay que poner h=0.001 tf=1000
+E=15, phi=0.1, psi=0.3 Hay que poner h=0.001 tf=1000
+
+Parámetros de los plots de los mapas de Poincaré
+
+Parámetros de los gifs con phi=0.1 y psi=0.2
+E=1, phi=0.1, psi=0.3 Hay que poner h=0.01 tf=1000
+E=3, phi=0.1, psi=0.3 Hay que poner h=0.01 tf=1000
+E=5, phi=0.1, psi=0.3 Hay que poner h=0.01 tf=1000
+E=10, phi=0.1, psi=0.3 Hay que poner h=0.01 tf=1000
+E=15, phi=0.1, psi=0.3 Hay que poner h=0.001 tf=1000

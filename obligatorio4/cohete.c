@@ -4,7 +4,7 @@
 #define PI 3.14159
 #define w 2.6617*pow(10,-6)
 
-void main (void)
+int main (void)
 {
     double h;
 	h = 30;
@@ -156,5 +156,5 @@ void main (void)
 
     }
     fclose(f1);
-
+	return 0;
 }
