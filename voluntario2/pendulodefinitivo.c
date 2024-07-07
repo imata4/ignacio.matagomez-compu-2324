@@ -15,6 +15,8 @@ double f_ppsi(double phi, double psi, double pphi, double ppsi);
 
 int main(void)
 {
+    clock_t begin= clock(); //Empiezo a contar el tiempo de simulación
+
     int i, j; //Contadores
     double h; //Paso temporal
     double t; //Contador de tiempo
@@ -29,16 +31,16 @@ int main(void)
 
     FILE *f1,*f2,*f3,*f4;
     f1=fopen("pendulodoble1.txt", "w"); 
-    //f2=fopen("poincare2_phi_psi_E=1.txt", "w");
-    //f3=fopen("poincare2_phi_phipunto_E=1.txt", "w");
+    f2=fopen("poincare2_phi_psi_E=1.txt", "w");
+    f3=fopen("poincare2_phi_phipunto_E=1.txt", "w");
     f4=fopen("lyapunov E=1.txt", "w");
 
     //Establecemos las variables que regulan el tiempo de simulación
-    h=0.01;
-    tf=1000;
+    h=0.00001;
+    tf=100;
     t=0;
     //Condiciones iniciales
-    E=15;
+    E=1;
     y[0]=0.1; //Phi
     y[1]=0.30; //Psi
 
@@ -59,12 +61,12 @@ int main(void)
     fprintf(f1, "\n");
 
     //Imprimo los valores iniciales de phi y psi para hacer el mapa de Poincaré
-  /*  fprintf(f2, "%lf, %lf", y[0], y[1]);
+    fprintf(f2, "%lf, %lf", y[0], y[1]);
     fprintf(f2, "\n");
 
     //Imprimo los valores iniciales de phi y phi punto para hacer el mapa de Poincaré
     fprintf(f3, "%lf, %lf", y[0], y[2]);
-    fprintf(f3, "\n");*/
+    fprintf(f3, "\n");
 
     //LYAPUNOV
 
@@ -122,7 +124,7 @@ int main(void)
             //Aqui iba paso temporal
 
             //Imprimo las trayectorias en un fichero y los mapas de Poincaré en otro
-            /*fprintf(f1, "%lf, %lf \n", x1, y1);
+            fprintf(f1, "%lf, %lf \n", x1, y1);
             fprintf(f1, "%lf, %lf \n", x2, y2);
             fprintf(f1, "\n");
 
@@ -130,7 +132,7 @@ int main(void)
             fprintf(f2, "\n");
 
             fprintf(f3, "%lf, %lf", y[0], y[2]);
-            fprintf(f3, "\n");*/
+            fprintf(f3, "\n");
 
             //Procedo a computar las trayectorias perturbadas
 
@@ -226,6 +228,11 @@ int main(void)
     fclose(f2);
     fclose(f3);
     fclose(f4);
+
+     //Calculo el tiempo de ejecución
+    clock_t end=clock();
+    double tiempo= (double) (end-begin)/ CLOCKS_PER_SEC;
+    printf("Tiempo de compilacion=%lf \n", tiempo);
 
     return 0;
 }
