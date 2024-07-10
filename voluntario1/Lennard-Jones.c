@@ -6,7 +6,7 @@
 
 #define pi 3.141592
 
-const int N=20; //Número de partículas
+const int N=25; //Número de partículas
 const float L=4; //Tamaño del sistema
 const double dt=0.002; //Paso temporal
 const double dr=L*0.5; //Desviación máxima de la posición
