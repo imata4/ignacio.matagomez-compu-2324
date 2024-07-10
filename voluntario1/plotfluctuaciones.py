@@ -42,12 +42,9 @@ line_x = np.array([min(x), max(x)])
 line_y = np.array([min(y), max(y)])
 
 
-
-
 #Cálculo del coef pearson
 pearson_coef, _ = pearsonr(x, y)
 print (pearson_coef)
-
 
 
 plt.figure(figsize=(8, 6))
@@ -62,8 +59,8 @@ plt.plot(x, y, color='blue', label='Energía cinética')  # Dibuja los puntos de
 #plt.plot(line_x1, line_y1, color='red', label='Energía potencial') #para hacer mas de un ajuste en la misma grafica
 #plt.plot(line_x2, line_y2, color='yellow', label='Energía total')  # Dibuja la línea de ajuste
 
-plt.xlabel('Tiempo')
-plt.ylabel('<r^2>')
+plt.xlabel('Temperatura')
+plt.ylabel('<$r^2$>')
 plt.title('Fluctuaciones con respecto a la temperatura')
 
 plt.legend()

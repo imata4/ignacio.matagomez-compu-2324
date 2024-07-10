@@ -1,0 +1,32 @@
+Apartado 1
+h=0.002 tf=50
+N=20, L=10, distribucion aleatoria, v_modulo=1, velocidades aleatorias
+
+Apartado 2
+h=0.002 tf=50
+N=20, L=10, distribucion aleatoria, v_modulo=1, vx>0 vy=0
+
+Apartado 3
+h=0.002 tf=50
+N=16, L=10, distribucion aleatoria, v_modulo=1, velocidades aleatorias
+
+Apartado 4
+h=0.002 tf=50
+N=16, L=4, distribucion cuadrada, v_modulo=1, velocidades iniciales nulas: vx=vy=0
+
+Apartado 5
+    Hexagonal
+    h=0.01 tf=50
+    N=16, L=4, distribucion hexagonal, v_modulo=1, velocidades iniciales nulas: vx=vy=0
+
+    Distribucion aleatoria
+    h=0.01 tf=50
+    N=16, L=4, distribucion aleatoria, v_modulo=1, velocidades iniciales nulas: vx=vy=0
+
+Apartado 6
+h=0.01 tf=70
+N=16, L=4, distribución cuadrada, v_modulo=1, vx=vy=0, reescalando velocidades en ciertos tiempos con función reescalar_velocidades, factor=1.5
+
+Apartado 7
+h=0.01 tf=300
+N=16, L=4, distribución cuadrada, v_modulo=1, vx=vy=0, reescalando velocidades en ciertos tiempos con función reescalar_velocidades, factor=1.1

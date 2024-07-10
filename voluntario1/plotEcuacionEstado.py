@@ -14,7 +14,7 @@ def convert_float(value):
 
 def load_data_from_file(filename):
     # Define converters for each column to handle commas as decimal separators
-    converters = {0: convert_float, 1: convert_float,}# 2: convert_float, 3: convert_float}
+    converters = {0: convert_float, 1: convert_float, 2: convert_float, 3: convert_float}
     
     # Load the data from the file using the converters and specifying the tab delimiter
     data = np.loadtxt(filename, delimiter=',', converters=converters)
@@ -22,13 +22,13 @@ def load_data_from_file(filename):
     # Extract each column from the data
     x = data[:, 0]
     y = data[:, 1]
-    #errx = data[:, 2]
-    #erry = data[:, 3]
+    errx = data[:, 2]
+    erry = data[:, 3]
     
-    return x, y#, errx, erry
+    return x, y, errx, erry
 
 # Usage example, replace the path with your actual data file path
-x, y = load_data_from_file("C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/voluntario1/ecuacionestado.txt")
+x, y,errx,erry = load_data_from_file("C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/voluntario1/ecuacionestadomedia.txt")
 #x1, y1 = load_data_from_file("C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/voluntario1/presion.txt")
 #slope, intercept = linregress(x, y)
 #slope1, intercept1 = linregress(x1, y1)
@@ -52,7 +52,7 @@ print (pearson_coef)
 
 plt.figure(figsize=(8, 6))
 
-#plt.errorbar(x, y, xerr=errx, yerr=erry, fmt='o', color='blue', capsize=5)  # fmt='o' para puntos
+plt.errorbar(x, y, xerr=errx, yerr=erry, fmt='o', color='blue', capsize=5)  # fmt='o' para puntos
 #plt.errorbar(x1, y1, xerr=errx1, yerr=erry1, fmt='o', color='red', capsize=5)  # fmt='o' para puntos
 #plt.errorbar(x2, y2, xerr=errx2, yerr=erry2, fmt='o', color='yellow', capsize=5)  # fmt='o' para puntos
 

@@ -31,8 +31,8 @@ int main(void)
 
     FILE *f1,*f2,*f3,*f4;
     f1=fopen("pendulodoble1.txt", "w"); 
-    f2=fopen("poincare2_phi_psi_E=1.txt", "w");
-    f3=fopen("poincare2_phi_phipunto_E=1.txt", "w");
+    f2=fopen("poincare2_phi_psi_E=5.txt", "w");
+    f3=fopen("poincare2_phi_phipunto_E=5.txt", "w");
     f4=fopen("lyapunov E=1.txt", "w");
 
     //Establecemos las variables que regulan el tiempo de simulación
@@ -40,9 +40,9 @@ int main(void)
     tf=100;
     t=0;
     //Condiciones iniciales
-    E=1;
+    E=15;
     y[0]=0.1; //Phi
-    y[1]=0.30; //Psi
+    y[1]=0.3; //Psi
 
     //Para calcular pphi fijamos la velocidad en psi a 0
     y[2]=pow((E-2*g*(1-cos(y[1]))-g*(1-cos(y[0]))),0.5); //Momento de Phi  //Hay que introducir valores iniciales que permitan que la siguiente raíz no sea nula
