@@ -37,7 +37,7 @@ int main(void)
 
     //Establecemos las variables que regulan el tiempo de simulación
     h=0.001;
-    tf=100000;
+    tf=10000;
     t=0;
     //Condiciones iniciales
     E=15;
