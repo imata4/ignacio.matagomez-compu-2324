@@ -36,7 +36,7 @@ int main(void)
     f4=fopen("lyapunov E=1.txt", "w");
 
     //Establecemos las variables que regulan el tiempo de simulación
-    h=0.01;
+    h=0.1;
     tf=100;
     t=0;
     //Condiciones iniciales
