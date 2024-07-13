@@ -2,139 +2,232 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
+#include <omp.h>
 
 #define g 9.80665
 #define pi 3.14156
 
-void main(void)
+
+double f_vphi(double vphi);
+double f_vpsi(double vpsi);
+double f_aphi(double phi, double psi, double vphi, double vpsi);
+double f_apsi(double phi, double psi, double vphi, double vpsi);
+
+int main(void)
 {
-    double h=0.001;
-    double tf=1000; //Tiempo máximo de la simulación
+    clock_t begin= clock(); //Empiezo a contar el tiempo de simulación
 
-    double E; //Energía total
-	double phi,vphi,psi,vpsi; //Definición de ángulos del primer péndulo (phi) y del segundo péndulo (psi) junto con sus velocidades angulares
-	double pphi,ppsi; //Momentos generalizados
-	double k1phi,k1pphi,k1psi,k1ppsi;
-	double k2phi,k2pphi,k2psi,k2ppsi;
-	double k3phi,k3pphi,k3psi,k3ppsi;
-	double k4phi,k4pphi,k4psi,k4ppsi; //ki para todas las coordenadas
-	double aux,aux1;
-	int i,j;
-	double t=0; //tiempo
-	
-	double x1,y1; //Componentes x e y de la posición del primer péndulo  
-	double x2,y2;//Componentes x e y de la posición del segundo péndulo  
-	double m1,m2; //Masa del primer y el segundo péndulo
-	double l1,l2; //Longitudes del primer y segundo péndulo
+    int i, j; //Contadores
+    double h; //Paso temporal
+    double t; //Contador de tiempo
+    double tf; //Tiempo final de la simulación
 
-	FILE *f1;
-	
-	f1 = fopen("pendulo.txt","w");
+    double y[4]; //Vector que contiene las variables phi, psi, vphi, vpsi respectivamente
+    double k[4][4]; //Matriz que almacena los 4 k de las 4 variables correspondientes al algoritmo Runge-Kutta de cuarto orden
+    double E; //Energía del sistema
+    
+    double x1, y1; //Posición en x e y del primer péndulo
+    double x2, y2; //Posición en x e y del segundo péndulo
 
-    //Establecemos los parámetros a 1
-    l1=l2=m1=m2=1;
-	x1=x2=y1=y2=0;
+    //Variables para calculas los coeficientes de Lyapunov
 
+    double ypert[4]; //Vector y perturbado
+    double perturbacion[4] = {-0.05, -0.05, -0.05, -0.05}; //Vector que introduce las perturbaciones
+    double sumadivergente = 0.0;
+    double norma_perturbacion; //Lo utilizaremos para normalizar
+    double exponente_lyapunov;
+    int n; //Contador de iteraciones al calcular el exponente de Lyapunov
+
+    FILE *f1,*f2,*f3,*f4;
+    f1=fopen("pendulodoble.txt", "w"); 
+    f2=fopen("poincare_phi_psi_E=15.txt", "w");
+    f3=fopen("poincare_phi_phipunto_E=15.txt", "w");
+    f4=fopen("lyapunov_E=15.txt", "w");
+
+    //Establecemos las variables que regulan el tiempo de simulación
+    h=0.01;
+    tf=100;
+    t=0;
     //Condiciones iniciales
-	vpsi=0;
-    phi=0.3;
-    psi=0.1;
-	E=2;
-	//Hay que introducir valores iniciales que permitan que la siguiente raíz no sea nula
-    pphi=sqrt(E-2*g*(1-cos(phi))-g*(1-cos(psi)));
-	ppsi=pphi*cos(psi-phi);
+    E=15;
+    y[0]=0.10; //Phi
+    y[1]=0.2; //Psi
 
-	pphi=pphi*2;
+    //Para calcular pphi fijamos la velocidad en psi a 0
+    y[2]=sqrt(E+2*g*cos(y[0])+g*cos(y[1])); //Velocidad de Phi  //Hay que introducir valores iniciales que permitan que la siguiente raíz no sea nula
+    y[3]=0; //Velocidad de Psi
 
-	
-	//pphi=2*vphi+vpsi*cos(psi-phi);//Salen de derivar el lagrangiano respecto a las velocidades angulares
-	//ppsi=vpsi+vphi*cos(psi-phi);
+    //Calculo e imprimo las posiciones iniciales
+    x1=sin(y[0]);
+    y1=-cos(y[0]);
+    x2=x1+sin(y[1]);
+    y2=y1-cos(y[1]);
 
-    x1 = l1*sin(phi);
-    y1 = -l1*cos(phi);
-    x2 = x1 + l2*sin(psi);
-    y2 = y1 - l2*cos(psi);
+    fprintf(f1, "%lf, %lf \n", x1, y1);
+    fprintf(f1, "%lf, %lf \n", x2, y2);
+    fprintf(f1, "\n");
 
-	fprintf (f1,"%lf\t",x1);
-    fprintf(f1,",");
-    fprintf (f1,"%lf\t",y1);
-    fprintf(f1,"\n");
-    fprintf (f1,"%lf\t",x2);
-    fprintf(f1,",");
-    fprintf (f1,"%lf\n",y2);
-    fprintf(f1,"\n"); 
+    //Imprimo los valores iniciales de phi y psi para hacer el mapa de Poincaré
+    fprintf(f2, "%lf, %lf", y[0], y[1]);
+    fprintf(f2, "\n");
 
-	j=0;
-    while (t<tf)
-    {
-        //Calculamos las k1
-		k1phi = h*(pphi-ppsi*cos(psi-phi))/(2-pow(cos(psi-phi),2));
-		k1psi = h*(2*ppsi-pphi*cos(psi-phi))/(2-pow(cos(psi-phi),2));
-	
-		k1pphi = h*(-2*g*sin(phi)+2*sin(phi-psi)*((pphi*ppsi*pow(cos(psi-phi),2)-cos(psi-phi)*(2*pow(ppsi,2)+pow(pphi,2))+2*pphi*ppsi)/pow(2-pow(cos(psi-phi),2),2)));
-	
-		k1ppsi = h*(-g*sin(psi)+2*sin(psi-phi)*((pphi*ppsi*pow(cos(psi-phi),2)-cos(psi-phi)*(2*pow(ppsi,2)+pow(pphi,2))+2*pphi*ppsi)/pow(2-pow(cos(psi-phi),2),2)));
-		
-		//Calculamos las k2 usando las k1:
-		
-		k2phi = h*((pphi+k1pphi*0.5)-(ppsi+k1ppsi*0.5)*cos((ppsi+k1ppsi*0.5)-(pphi+k1pphi*0.5)))/(2-pow(cos((psi+k1psi*0.5)-(phi+k1phi*0.5)),2));
-		k2psi = h*(-(pphi+0.5*k1pphi)*cos((psi+0.5*k1psi)-(phi+0.5*k1phi))+2*(ppsi+0.5*k1ppsi))/(2-pow(cos((psi+0.5*k1psi)-(phi+0.5*k1phi)),2));
+    //Imprimo los valores iniciales de phi y phi punto para hacer el mapa de Poincaré
+    fprintf(f3, "%lf, %lf", y[0], y[2]);
+    fprintf(f3, "\n");
 
-		k2pphi = h*(-2*g*sin(phi+0.5*k1phi)+2*sin((phi+0.5*k1phi)-(psi+0.5*k1psi))*(((pphi+0.5*k1pphi)*(ppsi+0.5*k1ppsi)*pow(cos((psi+0.5*k1psi)-(phi+0.5*k1phi)),2)-cos((psi+0.5*k1psi)-(phi+0.5*k1phi))*(2*pow(ppsi+0.5*k1ppsi,2)+pow(pphi+0.5*k1pphi,2))+2*(pphi+0.5*k1pphi)*(ppsi+0.5*k1ppsi))/pow(2-pow(cos((psi+0.5*k1psi)-(phi+0.5*k1phi)),2),2)));
-		k2ppsi = h*(-g*sin(psi+0.5*k1psi)+2*sin((psi+0.5*k1psi)-(phi+0.5*k1phi))*(((pphi+0.5*k1pphi)*(ppsi+0.5*k1ppsi)*pow(cos((psi+0.5*k1psi)-(phi+0.5*k1phi)),2)-cos((psi+0.5*k1psi)-(phi+0.5*k1phi))*(2*pow(ppsi+0.5*k1ppsi,2)+pow(pphi+0.5*k1pphi,2))+2*(pphi+0.5*k1pphi)*(ppsi+0.5*k1ppsi))/pow(2-pow(cos((psi+0.5*k1psi)-(phi+0.5*k1phi)),2),2)));
-			
-		//Calculamos las k3 usando las k2:
-			
-		k3phi = h*((pphi+k2pphi*0.5)-(ppsi+k2ppsi*0.5)*cos((ppsi+k2ppsi*0.5)-(pphi+k2pphi*0.5)))/(2-pow(cos((psi+k2psi*0.5)-(phi+k2phi*0.5)),2));
-		k3psi = h*(-(pphi+0.5*k2pphi)*cos((psi+0.5*k2psi)-(phi+0.5*k2phi))+2*(ppsi+0.5*k2ppsi))/(2-pow(cos((psi+0.5*k2psi)-(phi+0.5*k2phi)),2));
+  
 
-		k3pphi = h*(-2*g*sin(phi+0.5*k2phi)+2*sin((phi+0.5*k2phi)-(psi+0.5*k2psi))*(((pphi+0.5*k2pphi)*(ppsi+0.5*k2ppsi)*pow(cos((psi+0.5*k2psi)-(phi+0.5*k2phi)),2)-cos((psi+0.5*k2psi)-(phi+0.5*k2phi))*(2*pow(ppsi+0.5*k2ppsi,2)+pow(pphi+0.5*k2pphi,2))+2*(pphi+0.5*k2pphi)*(ppsi+0.5*k2ppsi))/pow(2-pow(cos((psi+0.5*k2psi)-(phi+0.5*k2phi)),2),2)));
-		k3ppsi = h*(-g*sin(psi+0.5*k2psi)+2*sin((psi+0.5*k2psi)-(phi+0.5*k2phi))*(((pphi+0.5*k2pphi)*(ppsi+0.5*k2ppsi)*pow(cos((psi+0.5*k2psi)-(phi+0.5*k2phi)),2)-cos((psi+0.5*k2psi)-(phi+0.5*k2phi))*(2*pow(ppsi+0.5*k2ppsi,2)+pow(pphi+0.5*k2pphi,2))+2*(pphi+0.5*k2pphi)*(ppsi+0.5*k2ppsi))/pow(2-pow(cos((psi+0.5*k2psi)-(phi+0.5*k2phi)),2),2)));
-			
-				
-		//Calculamos las k4 usando las k3:
-			
-		k4phi = h*((pphi+k3pphi)-(ppsi+k3ppsi)*cos((ppsi+k3ppsi)-(pphi+k3pphi)))/(2-pow(cos((psi+k3psi)-(phi+k3phi)),2));
-		k4psi = h*(-(pphi+k3pphi)*cos((psi+k3psi)-(phi+k3phi))+2*(ppsi+k3ppsi))/(2-pow(cos((psi+k3psi)-(phi+k3phi)),2));
-
-		k4pphi = h*(-2*g*sin(phi+k3phi)+2*sin((phi+k3phi)-(psi+k3psi))*(((pphi+k3pphi)*(ppsi+k3ppsi)*pow(cos((psi+k3psi)-(phi+k3phi)),2)-cos((psi+k3psi)-(phi+k3phi))*(2*pow(ppsi+k3ppsi,2)+pow(pphi+k3pphi,2))+2*(pphi+k3pphi)*(ppsi+k3ppsi))/pow(2-pow(cos((psi+k3psi)-(phi+k3phi)),2),2)));
-		k4ppsi = h*(-g*sin(psi+k3psi)+2*sin((psi+k3psi)-(phi+k3phi))*(((pphi+k3pphi)*(ppsi+k3ppsi)*pow(cos((psi+k3psi)-(phi+k3phi)),2)-cos((psi+k3psi)-(phi+k3phi))*(2*pow(ppsi+k3ppsi,2)+pow(pphi+k3pphi,2))+2*(pphi+k3pphi)*(ppsi+k3ppsi))/pow(2-pow(cos((psi+k3psi)-(phi+k3phi)),2),2)));
-			
-
-        //Calculamos las nuevas coordenadas:
-
-		phi=phi+(k1phi+2*k2phi+2*k3phi+k4phi)/6.0; 
-        psi=psi+(k1psi+2*k2psi+2*k3psi+k4psi)/6.0; 
-		pphi=pphi+(k1pphi+2*k2pphi+2*k3pphi+k4pphi)/6.0; 
-        ppsi=ppsi+(k1ppsi+2*k2ppsi+2*k3ppsi+k4ppsi)/6.0; 
-
-        //Aumento el tiempo en un paso h
-        t+=h;
-
-		//Computamos las ecuaciones del movimiento:
-		x1 = l1*sin(phi);
-    	y1 = -l1*cos(phi);
-    	x2 = x1 + l2*sin(psi);
-    	y2 = y1 - l2*cos(psi);
-
-        //if(j==30)
-        //{
-            fprintf (f1,"%lf\t",x1);
-            fprintf(f1,",");
-            fprintf (f1,"%lf\t",y1);
-            fprintf(f1,"\n");
-            fprintf (f1,"%lf\t",x2);
-            fprintf(f1,",");
-            fprintf (f1,"%lf\n",y2);
-            fprintf(f1,"\n");  
-            //j=0;             
-        //}
-
-        //else j=j+1;
-
-    }
-    fclose(f1);
-
-}
+    for (i = 0; i < 4; i++) 
+        ypert[i] = y[i] + perturbacion[i];
     
 
+    for ( tf = 1000; tf <= 10000; tf+=1000)
+    {
+        t=0;
+        sumadivergente=0;
+        n=0;
+        while(t<tf)
+        {
+            //Calculo de k1:
+            k[0][0]=h*f_vphi(y[2]);
+            k[0][1]=h*f_vpsi(y[3]);
+            k[0][2]=h*f_aphi(y[0], y[1], y[2], y[3]);
+            k[0][3]=h*f_apsi(y[0], y[1], y[2], y[3]);
+        
+            //Calculo de k2:
+            k[1][0]=h*f_vphi(y[2]+0.5*k[0][2]);
+            k[1][1]=h*f_vpsi(y[3]+0.5*k[0][3]);
+            k[1][2]=h*f_aphi(y[0]+0.5*k[0][0], y[1]+0.5*k[0][1], y[2]+0.5*k[0][2], y[3]+0.5*k[0][3]);
+            k[1][3]=h*f_apsi(y[0]+0.5*k[0][0], y[1]+0.5*k[0][1], y[2]+0.5*k[0][2], y[3]+0.5*k[0][3]);
+            
+            //Calculo de k3:
+            k[2][0]=h*f_vphi(y[2]+0.5*k[1][2]);
+            k[2][1]=h*f_vpsi(y[3]+0.5*k[1][3]);
+            k[2][2]=h*f_aphi(y[0]+0.5*k[1][0], y[1]+0.5*k[1][1], y[2]+0.5*k[1][2], y[3]+0.5*k[1][3]);
+            k[2][3]=h*f_apsi(y[0]+0.5*k[1][0], y[1]+0.5*k[1][1], y[2]+0.5*k[1][2], y[3]+0.5*k[1][3]);
+
+            //Calculo de k4
+            k[3][0]=h*f_vphi(y[2]+k[2][2]);
+            k[3][1]=h*f_vpsi(y[3]+k[2][3]);
+            k[3][2]=h*f_aphi(y[0]+k[2][0], y[1]+k[2][1], y[2]+k[2][2], y[3]+k[2][3]);
+            k[3][3]=h*f_apsi(y[0]+k[2][0], y[1]+k[2][1], y[2]+k[2][2], y[3]+k[2][3]);
+            
+            //Calculo de la nueva y
+            for(i=0;i<4;i++)
+                y[i]=y[i]+(k[0][i]+2*k[1][i]+2*k[2][i]+k[3][i])/6;
+            
+            
+            x1=sin(y[0]);
+            y1=-cos(y[0]);
+            x2=x1+sin(y[1]);
+            y2=y1-cos(y[1]);
+
+            
+
+            //Imprimo las trayectorias en un fichero y los mapas de Poincaré en otro
+            fprintf(f1, "%lf, %lf \n", x1, y1);
+            fprintf(f1, "%lf, %lf \n", x2, y2);
+            fprintf(f1, "\n");
+
+            fprintf(f2, "%lf, %lf", y[0], y[1]);
+            fprintf(f2, "\n");
+
+            fprintf(f3, "%lf, %lf", y[0], y[2]);
+            fprintf(f3, "\n");
+
+            
+            //Procedo a computar las trayectorias perturbadas
+
+            //Calculo de k1:
+            k[0][0]=h*f_vphi(ypert[2]);
+            k[0][1]=h*f_vpsi(ypert[3]);
+            k[0][2]=h*f_aphi(ypert[0], ypert[1], ypert[2], ypert[3]);
+            k[0][3]=h*f_apsi(ypert[0], ypert[1], ypert[2], ypert[3]);
+        
+            //Calculo de k2:
+            k[1][0]=h*f_vphi(ypert[2]+0.5*k[0][2]);
+            k[1][1]=h*f_vpsi(ypert[3]+0.5*k[0][3]);
+            k[1][2]=h*f_aphi(ypert[0]+0.5*k[0][0], ypert[1]+0.5*k[0][1], ypert[2]+0.5*k[0][2], ypert[3]+0.5*k[0][3]);
+            k[1][3]=h*f_apsi(ypert[0]+0.5*k[0][0], ypert[1]+0.5*k[0][1], ypert[2]+0.5*k[0][2], ypert[3]+0.5*k[0][3]);
+            
+            //Calculo de k3:
+            k[2][0]=h*f_vphi(ypert[2]+0.5*k[1][2]);
+            k[2][1]=h*f_vpsi(ypert[3]+0.5*k[1][3]);
+            k[2][2]=h*f_aphi(ypert[0]+0.5*k[1][0], ypert[1]+0.5*k[1][1], ypert[2]+0.5*k[1][2], ypert[3]+0.5*k[1][3]);
+            k[2][3]=h*f_apsi(ypert[0]+0.5*k[1][0], ypert[1]+0.5*k[1][1], ypert[2]+0.5*k[1][2], ypert[3]+0.5*k[1][3]);
+
+            //Calculo de k4
+            k[3][0]=h*f_vphi(ypert[2]+k[2][2]);
+            k[3][1]=h*f_vpsi(ypert[3]+k[2][3]);
+            k[3][2]=h*f_aphi(ypert[0]+k[2][0], ypert[1]+k[2][1], ypert[2]+k[2][2], ypert[3]+k[2][3]);
+            k[3][3]=h*f_apsi(ypert[0]+k[2][0], ypert[1]+k[2][1], ypert[2]+k[2][2], ypert[3]+k[2][3]);
+            
+            //Calculo de la nueva ypert
+            for(i=0;i<4;i++)
+                ypert[i]=ypert[i]+(k[0][i]+2*k[1][i]+2*k[2][i]+k[3][i])/6;
+
+
+
+            for (i = 0; i < 4; i++) 
+            {
+                perturbacion[i] = ypert[i] - y[i]; //Diferencia entre las trayectorias
+            }
+
+            norma_perturbacion = sqrt(perturbacion[0] * perturbacion[0] + perturbacion[1] * perturbacion[1] +
+                                    perturbacion[2] * perturbacion[2] + perturbacion[3] * perturbacion[3]);
+            sumadivergente += log(fabs(norma_perturbacion)/ 0.05);
+
+            for (i = 0; i < 4; i++) 
+            {
+                perturbacion[i] *= 0.05/ norma_perturbacion;
+                ypert[i] = y[i] + perturbacion[i];
+            }
+
+            n++;
+      
+           //Añado un paso temporal
+            t+=h;
+        }
+
+        exponente_lyapunov=sumadivergente/(n*h) ;
+        fprintf(f4,"%lf, %lf",tf, exponente_lyapunov);
+        fprintf(f4, "\n");
+    }
+            
+    fclose(f1);
+    fclose(f2);
+    fclose(f3);
+    fclose(f4);
+
+     //Calculo el tiempo de ejecución
+    clock_t end=clock();
+    double tiempo= (double) (end-begin)/ CLOCKS_PER_SEC;
+    printf("Tiempo de compilacion=%lf \n", tiempo);
+
+    return 0;
+}
+
+double f_vphi(double vphi)
+{
+    return vphi;
+}
+
+double f_vpsi(double vpsi)
+{
+    return vpsi;
+}
+
+
+double f_aphi(double phi, double psi, double vphi, double vpsi) //Función para calcular la aceleración en phi (phi doble punto)
+{
+    double aphi= (g*sin(psi)*cos(phi-psi) - 2*g*sin(phi) - pow(vphi, 2)*cos(phi-psi)*sin(phi-psi) - pow(vpsi, 2)*sin(phi - psi))/(2 - pow(cos(phi-psi), 2));
+    
+    return aphi;
+}
+
+double f_apsi(double phi, double psi, double vphi, double vpsi) //Función para calcular la aceleración en psi (psi doble punto)
+{
+    double apsi = (g*sin(phi)*cos(phi-psi) - g*sin(psi) + 0.5*pow(vpsi, 2)*cos(phi-psi)*sin(phi-psi) + pow(vphi, 2)*sin(phi-psi))/(1 - 0.5*pow(cos(phi-psi), 2));
+  
+    return apsi;
+}

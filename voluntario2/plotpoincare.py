@@ -28,11 +28,11 @@ def load_data_from_file(filename):
     return x, y#, errx, erry
 
 # Cambiar nombre del archivo de datos para cambiar los datos recogidos
-x, y = load_data_from_file("C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/voluntario2/poincare2_phi_psi_E=1.txt")
-x1, y1 = load_data_from_file("C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/voluntario2/poincare2_phi_psi_E=3.txt")
-x2, y2 = load_data_from_file("C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/voluntario2/poincare2_phi_psi_E=5.txt")
-x3, y3 = load_data_from_file("C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/voluntario2/poincare2_phi_psi_E=10.txt")
-x4, y4 = load_data_from_file("C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/voluntario2/poincare2_phi_psi_E=15.txt")
+x, y = load_data_from_file("C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/voluntario2/poincare_phi_psi_E=1.txt")
+x1, y1 = load_data_from_file("C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/voluntario2/poincare_phi_psi_E=3.txt")
+x2, y2 = load_data_from_file("C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/voluntario2/poincare_phi_psi_E=5.txt")
+x3, y3 = load_data_from_file("C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/voluntario2/poincare_phi_psi_E=10.txt")
+x4, y4 = load_data_from_file("C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/voluntario2/poincare_phi_psi_E=15.txt")
 #slope, intercept = linregress(x, y)
 #slope1, intercept1 = linregress(x1, y1)
 #slope2, intercept2 = linregress(x2, y2)

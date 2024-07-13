@@ -6,7 +6,7 @@
 
 #define pi 3.141592
 
-const int N=50; //Número de partículas
+const int N=16; //Número de partículas
 const float L=4; //Tamaño del sistema
 const double dt=0.002; //Paso temporal
 const double dr=L*0.5; //Desviación máxima de la posición
@@ -66,7 +66,8 @@ int main (void)
 
     srand(time(NULL));
 
-
+    //Elegir el tipo de distribución para las partículas:
+    
     //distribucion_aleatoria(x,y);
     distribucion_cuadrada(x,y);
     //distribucion_hexagonal(x,y);
@@ -229,7 +230,7 @@ void distribucion_aleatoria(double x[],double y[])
     bool condition = false;
     srand(time(NULL));
 
-    /*double rnd1 = (double)rand() / (double)(RAND_MAX + 1);
+    double rnd1 = (double)rand() / (double)(RAND_MAX + 1);
     double rnd2 = (double)rand() / (double)(RAND_MAX + 1);
     x[0] = 0.5*L+2*(rnd1-0.5)*dr;
     y[0] = 0.5*L+2*(rnd2-0.5)*dr;
@@ -238,8 +239,8 @@ void distribucion_aleatoria(double x[],double y[])
         condition = true;
         while (condition == true)
         {
-            //double rnd1 = (double)rand() / (double)(RAND_MAX + 1);
-            //double rnd2 = (double)rand() / (double)(RAND_MAX + 1);
+            double rnd1 = (double)rand() / (double)(RAND_MAX + 1);
+            double rnd2 = (double)rand() / (double)(RAND_MAX + 1);
 
             x[i] = 0.5*L+2*(rnd1-0.5)*dr;
             y[i] = 0.5*L+2*(rnd2-0.5)*dr;
@@ -258,7 +259,7 @@ void distribucion_aleatoria(double x[],double y[])
                 }
             }
         }
-    }*/
+    }
 }
 
 void distribucion_cuadrada(double x[],double y[])
@@ -290,7 +291,7 @@ void generar_velocidades(double vx[],double vy[],double v[])
 
     for (int i = 0; i < N; i++)
     {
-        //double rnd3 = (double)rand() / (double)(RAND_MAX + 1);
+        double rnd3 = (double)rand() / (double)(RAND_MAX + 1);
       
         //Pongo velocidad aleatoria entre 0 y v0
         //vx[i]=v0*cos(rnd3*2*pi);

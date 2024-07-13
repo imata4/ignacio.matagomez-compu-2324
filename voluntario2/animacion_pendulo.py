@@ -12,17 +12,17 @@
 #   (...)
 #   xN_1, yN_1
 #   
-#   x1_2, y1_2
+#   x1_2, y2_2
 #   x2_2, y2_2
 #   x3_2, y3_2
 #   (...)
-#   xN_2, yN_2
+#   xN_2, y2_2
 #
-#   x1_3, y1_3
-#   x2_3, y2_3
+#   x1_3, y3_3
+#   x2_3, y3_3
 #   x3_3, y3_3
 #   (...)
-#   xN_3, yN_3
+#   xN_3, y3_3
 #   
 #   (...)
 #
@@ -47,19 +47,19 @@ import numpy as np
 
 # Parámetros
 # ========================================
-file_in = "C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/voluntario2/pendulodoble1.txt" # Nombre del fichero de datos
-file_out = "C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/voluntario2/E=15.1,phi=0.1,psi=0.2" # Nombre del fichero de salida (sin extensión)
+file_in = "C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/voluntario2/pendulodoble.txt" # Nombre del fichero de datos
+file_out = "C:/Users/ignac/OneDrive/Escritorio/Fisica23-24/FisicaComputacional/Git/ignacio.matagomez-compu-2324/voluntario2/E=15,phi=0.1,psi=0.2" # Nombre del fichero de salida (sin extensión)
 
 # Límites de los ejes X e Y
 x_min = -4
 x_max = 4
-y_min = -4
-y_max = 1
+y_min = -5
+y_max = 5
 
 interval = 1 # Tiempo entre fotogramas en milisegundos
 show_trail = True # Muestra la "estela" del planeta
 trail_width = 1 # Ancho de la estela
-save_to_file = False # False: muestra la animación por pantalla,
+save_to_file = True # False: muestra la animación por pantalla,
                      # True: la guarda en un fichero
 dpi = 150 # Calidad del vídeo de salida (dots per inch)
 
@@ -87,7 +87,7 @@ for frame_data_str in data_str.split("\n\n"):
     frame_data = list()
 
     # Itera sobre las líneas del bloque
-    # (cada línea da la posición de un planta)
+    # (cada línea da la posición de un planeta)
     for planet_pos_str in frame_data_str.split("\n"):
         # Lee la componente x e y de la línea
         planet_pos = np.fromstring(planet_pos_str, sep=",")
@@ -127,13 +127,12 @@ else:
                 "de planetas")
 
 # Representa el primer fotograma
-# Pinta un punto en la posición de cada paneta y guarda el objeto asociado
+# Pinta un punto en la posición de cada planeta y guarda el objeto asociado
 # al punto en una lista
 planet_points = list()
 planet_trails = list()
 for planet_pos, radius in zip(frames_data[0], planet_radius):
     x, y = planet_pos
-    #planet_point, = ax.plot(x, y, "o", markersize=10)
     planet_point = Circle((x, y), radius)
     ax.add_artist(planet_point)
     planet_points.append(planet_point)
@@ -144,9 +143,13 @@ for planet_pos, radius in zip(frames_data[0], planet_radius):
                 x, y, "-", linewidth=trail_width,
                 color=planet_points[-1].get_facecolor())
         planet_trails.append(planet_trail)
- 
+
+# Añadir las líneas que conectan las partículas y la primera partícula con el origen
+lines = [ax.plot([], [], 'k-', lw=2)[0] for _ in range(nplanets)]
+origin_line, = ax.plot([], [], 'k-', lw=2)  # Línea que conecta la primera partícula con el origen
+
 # Función que actualiza la posición de los planetas en la animación 
-def update(j_frame, frames_data, planet_points, planet_trails, show_trail):
+def update(j_frame, frames_data, planet_points, planet_trails, lines, origin_line, show_trail):
     # Actualiza la posición del correspondiente a cada planeta
     for j_planet, planet_pos in enumerate(frames_data[j_frame]):
         x, y = planet_pos
@@ -158,16 +161,31 @@ def update(j_frame, frames_data, planet_points, planet_trails, show_trail):
             ys_new = np.append(ys_old, y)
 
             planet_trails[j_planet].set_data(xs_new, ys_new)
+    
+    # Actualiza las líneas que conectan las partículas
+    for j_line in range(nplanets - 1):
+        xdata = [frames_data[j_frame][j_line][0], frames_data[j_frame][j_line + 1][0]]
+        ydata = [frames_data[j_frame][j_line][1], frames_data[j_frame][j_line + 1][1]]
+        lines[j_line].set_data(xdata, ydata)
 
-    return planet_points + planet_trails
+    # Actualiza la línea que conecta la primera partícula con el origen
+    xdata = [0, frames_data[j_frame][0][0]]
+    ydata = [0, frames_data[j_frame][0][1]]
+    origin_line.set_data(xdata, ydata)
+
+    return planet_points + planet_trails + lines + [origin_line]
 
 def init_anim():
     # Clear trails
     if show_trail:
         for j_planet in range(nplanets):
             planet_trails[j_planet].set_data(list(), list())
-
-    return planet_points + planet_trails
+    # Clear lines
+    for line in lines:
+        line.set_data([], [])
+    origin_line.set_data([], [])
+        
+    return planet_points + planet_trails + lines + [origin_line]
 
 # Calcula el nº de frames
 nframes = len(frames_data)
@@ -177,7 +195,7 @@ if nframes > 1:
     # Info sobre FuncAnimation: https://matplotlib.org/stable/api/animation_api.html
     animation = FuncAnimation(
             fig, update, init_func=init_anim,
-            fargs=(frames_data, planet_points, planet_trails, show_trail),
+            fargs=(frames_data, planet_points, planet_trails, lines, origin_line, show_trail),
             frames=len(frames_data), blit=True, interval=interval)
 
     # Muestra por pantalla o guarda según parámetros
@@ -185,10 +203,5 @@ if nframes > 1:
         animation.save("{}.mp4".format(file_out), dpi=dpi)
     else:
         plt.show()
-# En caso contrario, muestra o guarda una imagen
-else:
-    # Muestra por pantalla o guarda según parámetros
-    if save_to_file:
-        fig.savefig("{}.pdf".format(file_out))
-    else:
-        plt.show()
+
+   
