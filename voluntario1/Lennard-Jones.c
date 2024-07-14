@@ -12,19 +12,18 @@ const double dt=0.002; //Paso temporal
 const double dr=L*0.5; //Desviación máxima de la posición
 const double v0=1; //Velocidad inicial máxima 
 
-void distribucion_aleatoria(double x[],double y[]);
-void distribucion_cuadrada(double x[],double y[]);
-void distribucion_hexagonal(double x[],double y[]);
-void generar_velocidades(double vx[],double vy[],double v[]);
-double actualiza_posiciones(double x[], double y[],double vx[],double vy[],double wx[], double wy[],double momento);
-void aceleracion(double x[],double y[],double ax[],double ay[]);
-double Ecinetica(double vx[],double vy[],int size);
-double Epotencial(double x[],double y[],int size,float L);
-double distancia(double *rx, double *ry);
-void reescalar_velocidad(double vx[],double vy[],double t);
-double fluctuaciones(double x[], double y[],double x0[],double y0[]);
-double separacion_cuadratica_media(double x[],double y[]);
-
+void distribucion_aleatoria(double x[],double y[]); //Coloca las moléculas aleatoriamente en la caja
+void distribucion_cuadrada(double x[],double y[]); //Coloca las moléculas en forma de red cuadrada
+void distribucion_hexagonal(double x[],double y[]); //Coloca las moléculas de forma hexagonal
+void generar_velocidades(double vx[],double vy[],double v[]); //Genera las velocidades iniciales, ya sean aleatorias o nulas
+double actualiza_posiciones(double x[], double y[],double vx[],double vy[],double wx[], double wy[],double momento); //Incorpora las condiciones de contorno periódicas y devuelve el momento
+void aceleracion(double x[],double y[],double ax[],double ay[]); //Calcula la aceleración entre partículas
+double Ecinetica(double vx[],double vy[],int size); //Calcula la energía cinética
+double Epotencial(double x[],double y[],int size,float L); //Calcula la energía potencial
+double distancia(double *rx, double *ry); //Calcula la distancia entre dos partículas teniendo en cuenta las condiciones de contorno periódicas
+void reescalar_velocidad(double vx[],double vy[],double t); //Reescala las velocidades en un cierto factor para apartado 6 y 7
+double fluctuaciones(double x[], double y[],double x0[],double y0[]); //Calcula las fluctuaciones de una partícula respecto su posición inicial
+double separacion_cuadratica_media(double x[],double y[]); //Calcula la separación cuadrática media entre dos partículas
 
 
 int main (void)
@@ -166,7 +165,7 @@ int main (void)
             wx[i]=vx[i]+(dt*ax[i])/2.0;
             wy[i]=vy[i]+(dt*ay[i])/2.0;
         } 
-        //Establezco las condiciones de contorno periódicas para actualizar las posiciones y calculo del momento
+        //Establezco las condiciones de contorno periódicas para actualizar las posiciones y calculo el momento
     
         momento=actualiza_posiciones(x,y,vx,vy,wx,wy,momento);
 
@@ -188,7 +187,7 @@ int main (void)
        
     }
 
-    fprintf(f9, "%lf, %lf", dt*aux1/30, dt*aux2/30); 
+    fprintf(f9, "%lf, %lf", dt*aux1/30, dt*aux2/30); //Escuación de estado media en un intervalo de tiempo
             fprintf(f9, "\n");
 
     fclose(f1);

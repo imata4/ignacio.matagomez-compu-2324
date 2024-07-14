@@ -40,7 +40,7 @@ int main(void)
 
     FILE *f1,*f2,*f3,*f4;
     f1=fopen("pendulodoble.txt", "w"); 
-    f2=fopen("poincare_phi_psi_E=15.txt", "w");
+    f2=fopen("poincare_phi_psi_E=15.txt", "w");//Cambiar el nombre de los archivos según la energía establecida
     f3=fopen("poincare_phi_phipunto_E=15.txt", "w");
     f4=fopen("lyapunov_E=15.txt", "w");
 
@@ -51,7 +51,7 @@ int main(void)
     //Condiciones iniciales
     E=15;
     y[0]=0.10; //Phi
-    y[1]=0.2; //Psi
+    y[1]=0.3; //Psi
 
     //Para calcular pphi fijamos la velocidad en psi a 0
     y[2]=sqrt(E+2*g*cos(y[0])+g*cos(y[1])); //Velocidad de Phi  //Hay que introducir valores iniciales que permitan que la siguiente raíz no sea nula
@@ -76,11 +76,15 @@ int main(void)
     fprintf(f3, "\n");
 
   
-
+    //Inicializo el vector y perturbado a partir de la perturbación introducida
     for (i = 0; i < 4; i++) 
         ypert[i] = y[i] + perturbacion[i];
     
 
+    //Para calcular los coeficientes de Lyapunov para diferentes tiempos dejamos este bucle temporal en el que cada vez que se recorre se inicializan las variables
+    //necesarias para ccalcular los coeficientes de Lyapunov. 
+    //Por el contrario, si no queremos calcularlos y ver solo la animación, dejamos solo la aplicación del algoritmo de Runge-Kutta (while) para el vector y, terminando
+    //por imprimir las posiciones del péndulo e incrementando un paso temporal la variable t. (t+=h)
     for ( tf = 1000; tf <= 10000; tf+=1000)
     {
         t=0;
