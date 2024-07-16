@@ -1,1 +1,1 @@
-hola
+Todos los programas contienen archivos de texto (.txt) que recogen los datos al compilar el programa. No se incluyen los datos directamente pues se supera el límite de memoria necesario para subir los archivos a Git
